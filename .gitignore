@@ -1,0 +1,12 @@
+venv/
+.DS_Store
+.idea/
+resources/*
+!resources/.gitkeep
+examples/GPT_SECRET_KEY.json
+.ipynb_checkpoints/
+__pycache__/
+data/*
+!data/.gitkeep
+finetune/
+GPT2-python-code-generator/
