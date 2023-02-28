@@ -11,7 +11,9 @@ model = GPT2LMHeadModel.from_pretrained('gpt2')
 tokenizer.add_special_tokens(special_tokens_dict)
 model.resize_token_embeddings(len(tokenizer))
 
-wandb.login(key="9aa145803699f2aa674faf6be69c8ab904438798")
+with open('api_keys/wandb.txt') as f:
+    key = f.readlines()
+wandb.login(key=key[0])
 
 command = "python transformers/examples/pytorch/language-modeling/run_clm.py \
     --output_dir=model \
