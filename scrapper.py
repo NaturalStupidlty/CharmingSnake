@@ -1,4 +1,3 @@
-import math
 import os
 import csv
 from subprocess import call
@@ -50,14 +49,7 @@ def json_to_csv(json, path, fieldnames=None):
             writer.writerow(data)
 
 
-def save_json_data(json, split=0.9):
-    train_size = math.ceil(len(json) * split)
-    json_to_csv(json, 'data/data.csv')
-    json_to_csv(json[:train_size], 'data/train.csv')
-    json_to_csv(json[train_size:], 'data/test.csv')
-
-
 clone_repos('repos.txt')
 files_list = find_files('repos.txt')
 json_data = jsonify(files_list)
-save_json_data(json_data)
+json_to_csv(json_data, 'data/data.csv')

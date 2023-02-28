@@ -1,4 +1,5 @@
 https://github.com/trekhleb/learn-python
+https://github.com/AntonLiutov/roof_recognition
 https://github.com/MTrajK/coding-problems
 https://github.com/jerry-git/learn-python3
 https://github.com/facebookresearch/llama
