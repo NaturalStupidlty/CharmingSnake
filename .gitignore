@@ -2,6 +2,7 @@
 .idea/
 model/
 wandb/
+api_keys/
 resources/*
 !resources/.gitkeep
 examples/GPT_SECRET_KEY.json
