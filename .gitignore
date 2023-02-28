@@ -1,6 +1,7 @@
-venv/
 .DS_Store
 .idea/
+model/
+wandb/
 resources/*
 !resources/.gitkeep
 examples/GPT_SECRET_KEY.json
@@ -8,5 +9,3 @@ examples/GPT_SECRET_KEY.json
 __pycache__/
 data/*
 !data/.gitkeep
-finetune/
-GPT2-python-code-generator/
