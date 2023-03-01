@@ -29,4 +29,9 @@ def split(dataset, ratio, directory=''):
 
 
 data = pd.read_csv('data/data.csv')
+
+drop_idx = data[data['text'] == '<BOS><EOS>'].index
+data.drop(drop_idx, inplace=True)
+data.to_csv('data/data.csv', index=False)
+
 split(data, ratio=(0.7, 0.2, 0.1), directory='data/')
