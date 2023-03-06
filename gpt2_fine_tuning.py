@@ -1,0 +1,46 @@
+import torch
+from transformers import AutoModelWithLMHead, AutoTokenizer
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+model = AutoModelWithLMHead.from_pretrained("gpt2",
+                                            low_cpu_mem_usage=True)
+model.to(device)
+
+prompt = """Instruction: Generate a Python function that check if number is palindrome.
+
+Answer: """
+input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
+
+generated_ids = model.generate(input_ids,
+                               do_sample=True,
+                               temperature=0.9,
+                               max_length=256)
+generated_text = tokenizer.decode(generated_ids[0])
+print(generated_text)
+
+with open('api_keys/wandb.txt') as f:
+    key = f.readlines()
+wandb.login(key=key[0])
+
+command = 'python transformers/examples/pytorch/language-modeling/run_clm.py \
+    --output_dir=model \
+    --model_type gptj \
+    --model_name_or_path=hivemind/gpt-j-6B-8bit \
+    --tokenizer_name=EleutherAI/gpt-j-6B \
+    --do_train \
+    --do_eval \
+    --train_file=data/train.txt \
+    --validation_file=data/valid.txt \
+    --per_device_train_batch_size=1 \
+    --per_device_eval_batch_size=1 \
+    --evaluation_strategy epoch \
+    --logging_steps 300 \
+    --save_steps 1500 \
+    --save_total_limit 1 \
+    --learning_rate 5e-5 \
+    --num_train_epochs=1 \
+    --overwrite_output_dir'
+
+os.system(command)
