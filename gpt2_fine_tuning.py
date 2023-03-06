@@ -1,4 +1,5 @@
 import torch
+import wandb
 from transformers import AutoModelWithLMHead, AutoTokenizer
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -26,9 +27,8 @@ wandb.login(key=key[0])
 
 command = 'python transformers/examples/pytorch/language-modeling/run_clm.py \
     --output_dir=model \
-    --model_type gptj \
-    --model_name_or_path=hivemind/gpt-j-6B-8bit \
-    --tokenizer_name=EleutherAI/gpt-j-6B \
+    --model_type gpt2 \
+    --model_name_or_path=gpt2 \
     --do_train \
     --do_eval \
     --train_file=data/train.txt \

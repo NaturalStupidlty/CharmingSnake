@@ -5,7 +5,6 @@ import torch.nn.functional as F
 from torch import nn
 from torch.cuda.amp import custom_fwd, custom_bwd
 from bitsandbytes.functional import quantize_blockwise, dequantize_blockwise
-from datasets import load_dataset
 from bitsandbytes.optim import Adam8bit
 from tqdm.auto import tqdm
 
@@ -162,41 +161,24 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 def add_adapters(model, adapter_dim=16):
     assert adapter_dim > 0
 
-    for module in model.modules():
-        if isinstance(module, FrozenBNBLinear):
-            module.adapter = nn.Sequential(
-                nn.Linear(module.in_features, adapter_dim, bias=False),
-                nn.Linear(adapter_dim, module.out_features, bias=False),
-            )
-            nn.init.zeros_(module.adapter[1].weight)
-        elif isinstance(module, FrozenBNBEmbedding):
-            module.adapter = nn.Sequential(
-                nn.Embedding(module.num_embeddings, adapter_dim),
-                nn.Linear(adapter_dim, module.embedding_dim, bias=False),
-            )
-            nn.init.zeros_(module.adapter[1].weight)
+    for name, module in model.named_modules():
+        if "attn" in name:
+            if isinstance(module, FrozenBNBLinear):
+                module.adapter = nn.Sequential(
+                    nn.Linear(module.in_features, adapter_dim, bias=False),
+                    nn.Linear(adapter_dim, module.out_features, bias=False),
+                )
+                nn.init.zeros_(module.adapter[1].weight)
+            elif isinstance(module, FrozenBNBEmbedding):
+                module.adapter = nn.Sequential(
+                    nn.Embedding(module.num_embeddings, adapter_dim),
+                    nn.Linear(adapter_dim, module.embedding_dim, bias=False),
+                )
+                nn.init.zeros_(module.adapter[1].weight)
 
 
 add_adapters(gpt)
 gpt.to(device)
-
-
-def set_trainable_params(model, value=False, mode="adapter", verbose=False):
-    params_for_optimizer = []
-    if mode == "adapter":
-        for (name, param) in model.named_parameters():
-            if "attn" in name and "adapter" in name:
-                params_for_optimizer.append(name)
-    if verbose:
-        print("Trainable params:", len(params_for_optimizer))
-
-    for name, param in model.named_parameters():
-        if name not in params_for_optimizer:
-            # print(f"Setting {name} requires_grad=False")
-            param.requires_grad = False
-
-
-set_trainable_params(gpt)
 
 with open('small_train.txt', 'r') as f:
     train_data = f.readlines()
