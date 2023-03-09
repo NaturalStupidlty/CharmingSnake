@@ -68,7 +68,7 @@ class FrozenBNBEmbedding(nn.Module):
 
     def forward(self, input, **kwargs):
         with torch.no_grad():
-            # note: both quantuized weights and input indices are *not* differentiable
+            # note: both quantized weights and input indices are *not* differentiable
             weight_deq = dequantize_blockwise(self.weight, absmax=self.absmax, code=self.code)
             output = F.embedding(input, weight_deq, **kwargs)
         if self.adapter:
@@ -186,9 +186,10 @@ with open('small_test.txt', 'r') as f:
     test_data = f.readlines()
 
 
-def train(model, data, lr, seq_length=256, verbose=False):
+def train(data, lr, seq_length=256, verbose=False):
     optimizer = Adam8bit(gpt.parameters(), lr=lr)
     gpt.gradient_checkpointing_enable()
+
     losses = []
     perplexities = []
 
@@ -200,7 +201,7 @@ def train(model, data, lr, seq_length=256, verbose=False):
             batch = tokenizer(row, truncation=True, max_length=seq_length, return_tensors='pt')
             batch = {k: v.cuda() for k, v in batch.items()}
 
-            out = gpt.forward(**batch,)
+            out = gpt.forward(**batch)
 
             loss = F.cross_entropy(out.logits[:, :-1, :].flatten(0, -2), batch['input_ids'][:, 1:].flatten(),
                                    reduction='mean')
@@ -218,4 +219,4 @@ def train(model, data, lr, seq_length=256, verbose=False):
     return losses, perplexities
 
 
-train(gpt, train_data, lr=1e-7, verbose=True)
+train(train_data, lr=1e-7, verbose=True)
