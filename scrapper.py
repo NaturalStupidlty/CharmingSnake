@@ -7,21 +7,23 @@ def clone_repos(path, save_dir='resources'):
     with open(path, 'r') as f:
         lines = f.readlines()
     for line in lines:
-        walking_dir = f'{save_dir}/{line.strip().split("/")[-2] + "/" + line.strip().split("/")[-1]}'
+        walking_dir = f'{save_dir}/{"/".join(line.strip().split("/")[-2:])}'
         call(['git', 'clone', line.strip(), walking_dir])
 
 
-def find_files(path, save_dir='resources', extensions=None):
+def find_files(path, save_dir='resources', max_size=1000000, extensions=None):
     if extensions is None:
         extensions = ['py']
     with open(path, 'r') as f:
         lines = f.readlines()
     total_files_path = []
     for line in lines:
-        walking_dir = f'{save_dir}/{line.strip().split("/")[-2] + "/" + line.strip().split("/")[-1]}'
+        walking_dir = f'{save_dir}/{"/".join(line.strip().split("/")[-2:])}'
         for (current_path, folders, files) in os.walk(walking_dir):
             for file in files:
-                if file.split('.')[-1] in extensions:
+                size = os.path.getsize(path)
+                # only files with certain extensions and under max_size
+                if (file.split('.')[-1] in extensions) & (size < max_size):
                     total_files_path.append(os.path.join(current_path, file))
     return total_files_path
 
