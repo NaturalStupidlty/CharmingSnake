@@ -3,14 +3,21 @@ from math import isclose
 from sklearn.model_selection import train_test_split
 
 
-def extract_text(df, path, column='text'):
+def extract_text(dataframe, path, column='text'):
     f = open(path, 'w')
     file = ''
-    texts = df[column].tolist()
+    texts = dataframe[column].tolist()
     for text in texts:
         text = str(text).strip()
         file += text + '\n'
     f.write(file)
+
+
+def drop_empty_rows(dataframe):
+    drop_idx = dataframe[dataframe['text'] == '<BOS><EOS>'].index
+    dataframe.drop(drop_idx, inplace=True)
+    dataframe.to_csv('data/data.csv', index=False)
+    return dataframe
 
 
 def split(dataset, ratio, directory=''):
@@ -23,15 +30,11 @@ def split(dataset, ratio, directory=''):
     train, valid = train_test_split(train,
                                     train_size=train_valid_ratio,
                                     random_state=69)
-    extract_text(valid, f'{directory}valid.txt')
-    extract_text(train, f'{directory}train.txt')
-    extract_text(test, f'{directory}test.txt')
+    extract_text(valid, f'{directory}small_valid.txt')
+    extract_text(train, f'{directory}small_train.txt')
+    extract_text(test, f'{directory}small_test.txt')
 
 
-data = pd.read_csv('data/data.csv')
-
-drop_idx = data[data['text'] == '<BOS><EOS>'].index
-data.drop(drop_idx, inplace=True)
-data.to_csv('data/data.csv', index=False)
-
+data = pd.read_csv('data/small_data.csv')
+data = drop_empty_rows(data)
 split(data, ratio=(0.7, 0.2, 0.1), directory='data/')
