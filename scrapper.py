@@ -22,7 +22,7 @@ def find_files(path, save_dir='resources', max_size=1000000, extensions=None):
         for (current_path, folders, files) in os.walk(walking_dir):
             for file in files:
                 size = os.path.getsize(path)
-                # only files with certain extensions and under max_size
+                # Only files with certain extensions and under max_size
                 if (file.split('.')[-1] in extensions) & (size < max_size):
                     total_files_path.append(os.path.join(current_path, file))
     return total_files_path
