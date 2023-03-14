@@ -30,11 +30,11 @@ def split(dataset, ratio, directory=''):
     train, valid = train_test_split(train,
                                     train_size=train_valid_ratio,
                                     random_state=69)
-    extract_text(valid, f'{directory}small_valid.txt')
-    extract_text(train, f'{directory}small_train.txt')
-    extract_text(test, f'{directory}small_test.txt')
+    extract_text(valid, f'{directory}valid.txt')
+    extract_text(train, f'{directory}train.txt')
+    extract_text(test, f'{directory}test.txt')
 
 
-data = pd.read_csv('data/small_data.csv')
+data = pd.read_csv('data/data.csv')
 data = drop_empty_rows(data)
 split(data, ratio=(0.7, 0.2, 0.1), directory='data/')
