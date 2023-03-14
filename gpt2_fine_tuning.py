@@ -1,12 +1,13 @@
 import torch
 import wandb
-from transformers import AutoModelWithLMHead, AutoTokenizer
+import os
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
-model = AutoModelWithLMHead.from_pretrained("gpt2",
-                                            low_cpu_mem_usage=True)
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+model = GPT2LMHeadModel.from_pretrained("gpt2", low_cpu_mem_usage=True)
 model.to(device)
 
 prompt = """Instruction: Generate a Python function that check if number is palindrome.
@@ -17,7 +18,7 @@ input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
 generated_ids = model.generate(input_ids,
                                do_sample=True,
                                temperature=0.9,
-                               max_length=256)
+                               max_length=64)
 generated_text = tokenizer.decode(generated_ids[0])
 print(generated_text)
 
