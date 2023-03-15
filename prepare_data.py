@@ -1,15 +1,39 @@
+import re
 import numpy as np
 import pandas as pd
 from math import isclose
 from sklearn.model_selection import train_test_split
 
 
+def remove_licences(text):
+    lines = text.split('\n')
+    output = []
+    license_found = False
+    for i in range(len(lines)):
+        line = lines[i]
+        if not license_found and ('copyright' in line.lower()
+                                  or 'licence' in line.lower()
+                                  or 'licensed' in line.lower()):
+            license_found = True
+            continue
+        elif license_found and not line.startswith('#'):
+            license_found = False
+        elif license_found and line.startswith('#'):
+            continue
+        output.append(line)
+    return '\n'.join(output)
+
+
+def remove_links(text):
+    text = re.compile(r'https?://\S+').sub('', text)
+    return text if text else ''
+
+
 def drop_empty_rows(dataframe, column='text'):
-    # If there is only '<BOS><EOS>' then it is considered empty
-    drop_idx = dataframe[dataframe[column] == '<BOS><EOS>'].index
-    dataframe.drop(drop_idx, inplace=True)
-    dataframe.to_csv('data/data.csv', index=False)
-    return dataframe
+    drop_idx = dataframe[dataframe[column] == ''].index
+    # If there is only '<BOS><EOS>' then it is also considered empty
+    drop_idx.append(dataframe[dataframe[column] == '<BOS><EOS>'].index)
+    return dataframe.drop(drop_idx)
 
 
 def deduplicate(dataframe, column='text'):
@@ -35,11 +59,31 @@ def filtering(dataframe, column='text'):
     return filtered_dataframe
 
 
-def clean(dataframe):
+def has_docstring(text):
+    """
+    Check if a given text contains a docstring.
+
+    Args:
+        text (str): The text to check.
+
+    Returns:
+        bool: True if the text contains a docstring, False otherwise.
+    """
+    docstring_pattern = r'("""|\'\'\')(.*?)\1'
+    return re.search(docstring_pattern, text, re.DOTALL) is not None
+
+
+def clean(dataframe, column='text'):
+    # Clean samples
+    dataframe[column] = dataframe[column].apply(remove_licences)
+    dataframe[column] = dataframe[column].apply(remove_links)
+    # Remove samples that do not match requirements
     dataframe = drop_empty_rows(dataframe)
     dataframe = deduplicate(dataframe)
     dataframe = filtering(dataframe)
-    return dataframe
+    dataframe['has_docstring'] = dataframe[column].apply(has_docstring)
+    dataframe = dataframe[dataframe['has_docstring']]
+    return dataframe.drop('has_docstring', axis=1)
 
 
 def extract_text(dataframe, path, column='text'):
@@ -52,16 +96,16 @@ def extract_text(dataframe, path, column='text'):
     f.write(file)
 
 
-def split(dataset, ratio, directory=''):
+def split(dataset, ratio, directory='', random_state=69):
     assert isclose(sum(ratio), 1)
     train_test_ratio = round(ratio[0] + ratio[1], 1)
     train_valid_ratio = ratio[0] / train_test_ratio
     train, test = train_test_split(dataset,
                                    train_size=train_test_ratio,
-                                   random_state=69)
+                                   random_state=random_state)
     train, valid = train_test_split(train,
                                     train_size=train_valid_ratio,
-                                    random_state=69)
+                                    random_state=random_state)
     extract_text(valid, f'{directory}valid.txt')
     extract_text(train, f'{directory}train.txt')
     extract_text(test, f'{directory}test.txt')
