@@ -48,7 +48,6 @@ https://github.com/shadowsocks/shadowsocks
 https://github.com/apache/superset
 https://github.com/XX-net/XX-Net
 https://github.com/0voice/interview_internal_reference
-https://github.com/isocpp/CppCoreGuidelines
 https://github.com/testerSunshine/12306
 https://github.com/floodsung/Deep-Learning-Papers-Reading-Roadmap
 https://github.com/apachecn/AiLearning
