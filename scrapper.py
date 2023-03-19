@@ -13,7 +13,7 @@ def clone_repos(repos, clone_folder):
     with open(repos, 'r') as f:
         try:
             lines = f.readlines()
-        except UnicodeDecodeError as exception:
+        except Exception as exception:
             print('DecoderError: ', repos)
             raise exception
     for line in lines:
@@ -79,7 +79,7 @@ class Scrapper:
         with open(repos, 'r') as f:
             try:
                 lines = f.readlines()
-            except UnicodeDecodeError as exception:
+            except Exception as exception:
                 print('DecoderError: ', repos)
                 raise exception
         for line in lines:
@@ -100,9 +100,9 @@ class Scrapper:
             with open(path, 'r') as f:
                 try:
                     content = f.readlines()
-                except UnicodeDecodeError as exception:
+                except Exception as exception:
                     print('DecoderError: ', path)
-                    raise exception
+                    continue
                 summary = ''.join(content)
                 summary = str(summary).strip()
                 data = self.bos_token + summary + self.eos_token
