@@ -4,6 +4,12 @@ from subprocess import call
 
 
 def clone_repos(repos, clone_folder):
+    """
+    Clones repositories from repos file into clone_folder
+    @param repos: a file with each name separated with \n
+    @param clone_folder: folder to copy repos to
+    @return:
+    """
     with open(repos, 'r') as f:
         lines = f.readlines()
     for line in lines:
@@ -13,6 +19,11 @@ def clone_repos(repos, clone_folder):
 
 class Scrapper:
     def __init__(self, bos_token='<BOS>', eos_token='<EOS>'):
+        """
+        Initialises required fields, including bos_token and eos_token.
+        @param bos_token: token to mark beginning of a sentence
+        @param eos_token: token to mark end of a sentence
+        """
         self.bos_token = bos_token
         self.eos_token = eos_token
         self.fieldnames = ['text', 'repo_name', 'path']
@@ -20,6 +31,15 @@ class Scrapper:
         self.json = []
 
     def scrap(self, repos, clone_folder='resources', max_file_size=1000000, extensions=None):
+        """
+        Scraps data of certain extensions, under certain max_file_size from repos to clone_folder.
+        Then find files and copy their data to json, so it could be saved to csv using save() method
+        @param repos: a file with each name separated with \n
+        @param clone_folder: folder to clone repos to
+        @param max_file_size: maximum file size in bites
+        @param extensions: a list of file extensions to be considered
+        @return:
+        """
         if extensions is None:
             extensions = ['py']
         clone_repos(repos, clone_folder)
@@ -27,9 +47,27 @@ class Scrapper:
         self.__jsonify()
 
     def save(self, path):
-        self.__json_to_csv(path)
+        """
+        Saves scrapped repositories to dataframe (.csv) at a given path.
+        Should probably be used after scrap() method had been called.
+        @param path: path to save dataframe, like 'data/my_dataframe.csv'
+        @return:
+        """
+        with open(path, 'w') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
+            writer.writeheader()
+            for data in self.json:
+                writer.writerow(data)
 
     def __find_files(self, repos, clone_folder, max_file_size, extensions):
+        """
+        Method to find files of certain extensions, under certain max_file_size from repos in clone_folder.
+        @param repos: a python list with repos' names
+        @param clone_folder: folder that repos had been cloned to
+        @param max_file_size: maximum file size in bites
+        @param extensions: a list of file extensions to be considered
+        @return:
+        """
         with open(repos, 'r') as f:
             lines = f.readlines()
         for line in lines:
@@ -42,6 +80,10 @@ class Scrapper:
                         self.files_path.append(os.path.join(current_path, file))
 
     def __jsonify(self):
+        """
+        Read data from files in self.files_path into json format.
+        @return:
+        """
         for path in self.files_path:
             with open(path, 'r') as f:
                 try:
@@ -56,13 +98,6 @@ class Scrapper:
                 self.json.append({self.fieldnames[0]: data,
                                   self.fieldnames[1]: repo_name,
                                   self.fieldnames[2]: file_path})
-
-    def __json_to_csv(self, path):
-        with open(path, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
-            writer.writeheader()
-            for data in self.json:
-                writer.writerow(data)
 
 
 scrapper = Scrapper()
