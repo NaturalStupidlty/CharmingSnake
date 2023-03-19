@@ -11,7 +11,11 @@ def clone_repos(repos, clone_folder):
     @return:
     """
     with open(repos, 'r') as f:
-        lines = f.readlines()
+        try:
+            lines = f.readlines()
+        except UnicodeDecodeError as exception:
+            print('DecoderError: ', repos)
+            raise exception
     for line in lines:
         walking_dir = f'{clone_folder}/{"/".join(line.strip().split("/")[-2:])}'
         call(['git', 'clone', line.strip(), walking_dir])
@@ -53,11 +57,15 @@ class Scrapper:
         @param path: path to save dataframe, like 'data/my_dataframe.csv'
         @return:
         """
-        with open(path, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
-            writer.writeheader()
-            for data in self.json:
-                writer.writerow(data)
+        try:
+            with open(path, 'w') as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
+                writer.writeheader()
+                for data in self.json:
+                    writer.writerow(data)
+        except Exception as exception:
+            print(f"Error writing to file: {str(exception)}")
+            raise exception
 
     def __find_files(self, repos, clone_folder, max_file_size, extensions):
         """
@@ -69,7 +77,11 @@ class Scrapper:
         @return:
         """
         with open(repos, 'r') as f:
-            lines = f.readlines()
+            try:
+                lines = f.readlines()
+            except UnicodeDecodeError as exception:
+                print('DecoderError: ', repos)
+                raise exception
         for line in lines:
             walking_dir = f'{clone_folder}/{"/".join(line.strip().split("/")[-2:])}'
             for (current_path, folders, files) in os.walk(walking_dir):
@@ -88,8 +100,9 @@ class Scrapper:
             with open(path, 'r') as f:
                 try:
                     content = f.readlines()
-                except UnicodeDecodeError:
+                except UnicodeDecodeError as exception:
                     print('DecoderError: ', path)
+                    raise exception
                 summary = ''.join(content)
                 summary = str(summary).strip()
                 data = self.bos_token + summary + self.eos_token
