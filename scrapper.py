@@ -100,7 +100,7 @@ class Scrapper:
             with open(path, 'r') as f:
                 try:
                     content = f.readlines()
-                except Exception as exception:
+                except UnicodeDecodeError:
                     print('DecoderError: ', path)
                     continue
                 summary = ''.join(content)
