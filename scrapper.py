@@ -32,7 +32,7 @@ class Scrapper:
         self.eos_token = eos_token
         self.fieldnames = ['text', 'repo_name', 'path']
         self.files_path = []
-        self.json = []
+        self.dictList = []
 
     def scrap(self, repos, clone_folder='resources', max_file_size=1000000, extensions=None):
         """
@@ -48,7 +48,7 @@ class Scrapper:
             extensions = ['py']
         clone_repos(repos, clone_folder)
         self.__find_files(repos, clone_folder, max_file_size, extensions)
-        self.__jsonify()
+        self.__getFilesContent()
 
     def save(self, path):
         """
@@ -61,7 +61,7 @@ class Scrapper:
             with open(path, 'w') as csv_file:
                 writer = csv.DictWriter(csv_file, fieldnames=self.fieldnames)
                 writer.writeheader()
-                for data in self.json:
+                for data in self.dictList:
                     writer.writerow(data)
         except Exception as exception:
             print(f"Error writing to file: {str(exception)}")
@@ -91,9 +91,9 @@ class Scrapper:
                     if (file.split('.')[-1] in extensions) & (size < max_file_size):
                         self.files_path.append(os.path.join(current_path, file))
 
-    def __jsonify(self):
+    def __getFilesContent(self):
         """
-        Read data from files in self.files_path into json format.
+        Read data from files in self.files_path into list of dictionaries
         @return:
         """
         for path in self.files_path:
@@ -108,9 +108,9 @@ class Scrapper:
                 data = self.bos_token + summary + self.eos_token
                 repo_name = '/'.join(path.split('/')[1:3])
                 file_path = '/'.join(path.split('/')[3:])
-                self.json.append({self.fieldnames[0]: data,
-                                  self.fieldnames[1]: repo_name,
-                                  self.fieldnames[2]: file_path})
+                self.dictList.append({self.fieldnames[0]: data,
+                                      self.fieldnames[1]: repo_name,
+                                      self.fieldnames[2]: file_path})
 
 
 scrapper = Scrapper()
