@@ -73,6 +73,7 @@ def has_docstring(text):
     return re.search(docstring_pattern, text, re.DOTALL) is not None
 
 
+# template method ???
 def clean(dataframe, column='text'):
     # Clean samples
     dataframe[column] = dataframe[column].apply(remove_licences)
