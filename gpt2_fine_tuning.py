@@ -10,7 +10,7 @@ tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 model = GPT2LMHeadModel.from_pretrained("gpt2", low_cpu_mem_usage=True)
 model.to(device)
 
-prompt = """Instruction: Generate a Python function that check if number is palindrome.
+prompt = """Instruction: Generate a Python function that checks if number is a palindrome.
 
 Answer: """
 input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
